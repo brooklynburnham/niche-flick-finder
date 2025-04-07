@@ -43,7 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 text-xl font-bold">
-          <Film className="h-6 w-6 text-cineniche-purple" />
+          <Film className="h-6 w-6 text-cineniche-blue" />
           <span>CineNiche</span>
         </Link>
 
@@ -51,15 +51,15 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
         <nav className="hidden md:flex items-center gap-6">
           {user && (
             <>
-              <Link to="/movies" className="text-sm font-medium hover:text-cineniche-purple transition-colors">
+              <Link to="/movies" className="text-sm font-medium hover:text-cineniche-blue transition-colors">
                 Movies
               </Link>
               {isAdmin && (
-                <Link to="/admin" className="text-sm font-medium hover:text-cineniche-purple transition-colors">
+                <Link to="/admin" className="text-sm font-medium hover:text-cineniche-blue transition-colors">
                   Admin
                 </Link>
               )}
-              <Link to="/privacy" className="text-sm font-medium hover:text-cineniche-purple transition-colors">
+              <Link to="/privacy" className="text-sm font-medium hover:text-cineniche-blue transition-colors">
                 Privacy
               </Link>
             </>

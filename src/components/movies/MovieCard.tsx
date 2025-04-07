@@ -42,7 +42,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, className }) => {
             {movie.genres.slice(0, 2).map((genre) => (
               <span 
                 key={genre} 
-                className="inline-flex items-center rounded-full bg-cineniche-purple/20 px-2 py-0.5 text-xs font-medium text-cineniche-light-purple"
+                className="inline-flex items-center rounded-full bg-cineniche-blue/20 px-2 py-0.5 text-xs font-medium text-cineniche-light-blue"
               >
                 {genre}
               </span>

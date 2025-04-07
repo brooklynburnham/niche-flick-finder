@@ -22,7 +22,7 @@ const Hero: React.FC<HeroProps> = ({ movie }) => {
           alt={movie.title}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-cineniche-dark-blue/90 via-cineniche-dark-blue/70 to-transparent" />
       </div>
       
       {/* Content */}
@@ -65,12 +65,12 @@ const Hero: React.FC<HeroProps> = ({ movie }) => {
           </p>
           
           <div className="flex flex-wrap gap-4 pt-2">
-            <Button className="gap-2">
+            <Button className="gap-2 bg-cineniche-blue hover:bg-cineniche-blue/90">
               <Play className="h-4 w-4" />
               Watch Now
             </Button>
             <Link to={`/movies/${movie.id}`}>
-              <Button variant="outline">View Details</Button>
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">View Details</Button>
             </Link>
           </div>
         </div>

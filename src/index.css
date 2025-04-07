@@ -5,33 +5,33 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 200 20% 98%;
+    --foreground: 200 50% 20%;
     
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 200 20% 98%;
+    --card-foreground: 200 50% 20%;
     
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 200 20% 98%;
+    --popover-foreground: 200 50% 20%;
     
-    --primary: 252 94% 67%;
+    --primary: 198 100% 48%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 172 70% 40%;
+    --secondary-foreground: 0 0% 100%;
     
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 200 10% 90%;
+    --muted-foreground: 200 10% 40%;
     
-    --accent: 12 97% 42%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 172 84% 38%;
+    --accent-foreground: 0 0% 100%;
     
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 200 15% 85%;
+    --input: 200 15% 85%;
+    --ring: 198 100% 48%;
     
     --radius: 0.5rem;
   }
@@ -48,7 +48,7 @@
   }
 
   ::selection {
-    @apply bg-cineniche-purple text-white;
+    @apply bg-cineniche-blue text-white;
   }
 }
 
@@ -62,7 +62,7 @@
   }
   
   .hero-gradient {
-    @apply bg-gradient-to-r from-black/90 via-black/70 to-transparent;
+    @apply bg-gradient-to-r from-cineniche-dark-blue/90 via-cineniche-dark-blue/70 to-transparent;
   }
   
   .text-balance {

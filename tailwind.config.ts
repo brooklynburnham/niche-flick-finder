@@ -64,11 +64,12 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				cineniche: {
-					purple: '#8B5CF6',
-					'dark-purple': '#1A1F2C',
-					'light-purple': '#D6BCFA',
-					'secondary-purple': '#7E69AB',
-					accent: '#F97316',
+					blue: '#0EA5E9', // Main blue color (similar to VidAngle)
+					'dark-blue': '#0C4A6E',
+					'light-blue': '#7DD3FC',
+					teal: '#14B8A6', // Secondary teal color
+					'dark-teal': '#0F766E',
+					'light-teal': '#5EEAD4'
 				}
 			},
 			borderRadius: {

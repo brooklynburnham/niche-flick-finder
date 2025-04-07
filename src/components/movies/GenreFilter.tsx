@@ -22,7 +22,7 @@ const GenreFilter: React.FC<GenreFilterProps> = ({
           <Badge
             key="all"
             variant={!selectedGenre ? "default" : "outline"}
-            className="cursor-pointer whitespace-nowrap"
+            className="cursor-pointer whitespace-nowrap bg-cineniche-blue hover:bg-cineniche-blue/90"
             onClick={() => onSelectGenre(undefined)}
           >
             All Genres
@@ -32,7 +32,7 @@ const GenreFilter: React.FC<GenreFilterProps> = ({
             <Badge
               key={genre}
               variant={selectedGenre === genre ? "default" : "outline"}
-              className="cursor-pointer whitespace-nowrap"
+              className={`cursor-pointer whitespace-nowrap ${selectedGenre === genre ? 'bg-cineniche-blue hover:bg-cineniche-blue/90' : 'hover:text-cineniche-blue'}`}
               onClick={() => onSelectGenre(genre)}
             >
               {genre}

@@ -15,7 +15,7 @@ const FeaturedMovies: React.FC<FeaturedMoviesProps> = ({ title, movies }) => {
   return (
     <section className="py-8">
       <div className="container">
-        <h2 className="text-2xl font-bold mb-6">{title}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-cineniche-dark-blue">{title}</h2>
         
         <ScrollArea>
           <div className="flex space-x-4 pb-4">
