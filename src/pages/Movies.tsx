@@ -6,13 +6,14 @@ import MovieGrid from '@/components/movies/MovieGrid';
 import GenreFilter from '@/components/movies/GenreFilter';
 import Hero from '@/components/movies/Hero';
 import FeaturedMovies from '@/components/movies/FeaturedMovies';
-import { useMovies } from '@/contexts/MovieContext';
+import { useMovies, Movie } from '@/contexts/MovieContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Carousel, 
   CarouselContent, 
   CarouselItem 
 } from '@/components/ui/carousel';
+import RecommendedMovies from '@/components/movies/RecommendedMovies';
 
 const Movies = () => {
   const { isAuthenticated } = useAuth();
@@ -47,18 +48,44 @@ const Movies = () => {
   };
 
   // Generate movie categories
-  const getPopularMovies = () => {
-    return movies
+  const getMoviesByCategory = () => {
+    // Popular movies (high rating)
+    const popularMovies = [...movies]
       .filter(movie => movie.userRating >= 4)
       .sort((a, b) => b.userRating - a.userRating)
       .slice(0, 10);
-  };
-
-  const getRecentMovies = () => {
-    return [...movies]
+      
+    // Recent releases
+    const recentReleases = [...movies]
       .sort((a, b) => new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime())
       .slice(0, 10);
+      
+    // Action movies
+    const actionMovies = movies
+      .filter(movie => movie.genres.includes('Action'))
+      .slice(0, 10);
+      
+    // Comedy movies
+    const comedyMovies = movies
+      .filter(movie => movie.genres.includes('Comedy'))
+      .slice(0, 10);
+      
+    // Drama movies
+    const dramaMovies = movies
+      .filter(movie => movie.genres.includes('Drama'))
+      .slice(0, 10);
+    
+    return {
+      popularMovies,
+      recentReleases,
+      actionMovies,
+      comedyMovies,
+      dramaMovies
+    };
   };
+  
+  // Get all category movies
+  const categories = getMoviesByCategory();
 
   if (!isAuthenticated) {
     return null; // Don't render anything while redirecting
@@ -130,13 +157,32 @@ const Movies = () => {
         {!filters.genre && !filters.searchQuery && (
           <>
             {/* Popular Movies Section */}
-            <FeaturedMovies title="Popular Movies" movies={getPopularMovies()} />
+            {categories.popularMovies.length > 0 && (
+              <FeaturedMovies title="Popular Movies" movies={categories.popularMovies} />
+            )}
             
             {/* Recent Releases Section */}
-            <FeaturedMovies title="Recent Releases" movies={getRecentMovies()} />
+            {categories.recentReleases.length > 0 && (
+              <FeaturedMovies title="Recent Releases" movies={categories.recentReleases} />
+            )}
+            
+            {/* Action Movies */}
+            {categories.actionMovies.length > 0 && (
+              <FeaturedMovies title="Action" movies={categories.actionMovies} />
+            )}
+            
+            {/* Comedy Movies */}
+            {categories.comedyMovies.length > 0 && (
+              <FeaturedMovies title="Comedy" movies={categories.comedyMovies} />
+            )}
+            
+            {/* Drama Movies */}
+            {categories.dramaMovies.length > 0 && (
+              <FeaturedMovies title="Drama" movies={categories.dramaMovies} />
+            )}
             
             {/* All Movies Section */}
-            <h2 className="text-2xl font-bold mb-6">All Movies</h2>
+            <h2 className="text-2xl font-bold mt-8 mb-6">All Movies</h2>
             <MovieGrid movies={filteredMovies} loading={loading} />
           </>
         )}

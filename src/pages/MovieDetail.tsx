@@ -1,21 +1,36 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Star, Clock, Calendar, Film, User, ChevronLeft } from 'lucide-react';
+import { Star, Clock, Calendar, Film, User, ChevronLeft, X } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
-import { useMovies } from '@/contexts/MovieContext';
+import { useMovies, Movie } from '@/contexts/MovieContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import RecommendedMovies from '@/components/movies/RecommendedMovies';
 
 const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { getMovieById, rateMovie, loading } = useMovies();
+  const { getMovieById, rateMovie, loading, movies } = useMovies();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [userRating, setUserRating] = useState<number | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(true);
   
   const movie = id ? getMovieById(id) : undefined;
+  
+  // Handle dialog close
+  const handleClose = () => {
+    setDialogOpen(false);
+    navigate('/movies');
+  };
   
   // Redirect if not authenticated
   useEffect(() => {
@@ -29,6 +44,25 @@ const MovieDetail = () => {
     if (id && userRating !== null) {
       rateMovie(id, userRating);
     }
+  };
+  
+  // Get recommended movies based on genre
+  const getRecommendedMovies = (): Movie[] => {
+    if (!movie) return [];
+    
+    // Find movies with similar genres
+    return movies
+      .filter(m => 
+        m.id !== movie.id && // Exclude current movie
+        m.genres.some(genre => movie.genres.includes(genre)) // Must share at least one genre
+      )
+      .sort((a, b) => {
+        // Count matching genres for better sorting
+        const aMatches = a.genres.filter(genre => movie.genres.includes(genre)).length;
+        const bMatches = b.genres.filter(genre => movie.genres.includes(genre)).length;
+        return bMatches - aMatches; // Sort by most matching genres first
+      })
+      .slice(0, 6); // Limit to 6 recommendations
   };
   
   if (loading) {
@@ -55,136 +89,149 @@ const MovieDetail = () => {
     );
   }
   
+  const recommendedMovies = getRecommendedMovies();
+  
   return (
     <Layout>
-      {/* Hero Banner */}
-      <div className="relative h-[60vh] md:h-[70vh]">
-        <div className="absolute inset-0">
-          <img 
-            src={movie.bannerUrl || movie.posterUrl} 
-            alt={movie.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
-        </div>
-      </div>
-      
-      <div className="container -mt-40 md:-mt-64 relative z-10 pb-12">
-        <Button 
-          variant="ghost" 
-          className="mb-6"
-          onClick={() => navigate('/movies')}
-        >
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Back to Movies
-        </Button>
-        
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          {/* Movie Poster */}
-          <div className="md:col-span-3">
-            <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-xl">
-              <img 
-                src={movie.posterUrl} 
-                alt={movie.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="text-2xl">{movie.title}</DialogTitle>
+            <DialogDescription className="flex items-center gap-2 text-sm">
+              <span>{movie.releaseDate.split('-')[0]}</span>
+              <span>•</span>
+              <span>{movie.duration}</span>
+              <span>•</span>
+              <span>{movie.contentRating}</span>
+            </DialogDescription>
+          </DialogHeader>
           
-          {/* Movie Details */}
-          <div className="md:col-span-9">
-            <h1 className="text-3xl md:text-4xl font-bold">{movie.title}</h1>
-            
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-sm md:text-base text-muted-foreground">
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 mr-1.5" />
-                <span>{movie.releaseDate.split('-')[0]}</span>
-              </div>
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-1.5" />
-                <span>{movie.duration}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="font-medium">{movie.contentRating}</span>
-              </div>
-              <div className="flex items-center">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1.5" />
-                <span>{movie.userRating.toFixed(1)}</span>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-4">
+            {/* Movie Poster */}
+            <div className="md:col-span-4">
+              <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-lg">
+                <img 
+                  src={movie.posterUrl} 
+                  alt={movie.title}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-2 mt-4">
-              {movie.genres.map((genre) => (
-                <span 
-                  key={genre} 
-                  className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs md:text-sm font-medium"
-                >
-                  {genre}
-                </span>
-              ))}
-            </div>
-            
-            <Separator className="my-6" />
-            
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold mb-2">Synopsis</h2>
-                <p className="text-muted-foreground">{movie.description}</p>
+            {/* Movie Details */}
+            <div className="md:col-span-8">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center">
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 mr-1" />
+                  <span className="font-medium">{movie.userRating.toFixed(1)}</span>
+                </div>
+                
+                <div className="flex flex-wrap gap-2 ml-4">
+                  {movie.genres.map((genre) => (
+                    <span 
+                      key={genre} 
+                      className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-semibold mb-2">Director</h2>
-                  <div className="flex items-center">
-                    <Film className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span>{movie.director}</span>
+                  <h2 className="text-lg font-semibold mb-2">Synopsis</h2>
+                  <p className="text-muted-foreground">{movie.description}</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold mb-2">Director</h2>
+                    <div className="flex items-center">
+                      <Film className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>{movie.director}</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h2 className="text-lg font-semibold mb-2">Cast</h2>
+                    <div className="space-y-1">
+                      {movie.cast.slice(0, 3).map((actor) => (
+                        <div key={actor} className="flex items-center">
+                          <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span>{actor}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 
                 <div>
-                  <h2 className="text-xl font-semibold mb-2">Cast</h2>
-                  <div className="space-y-1">
-                    {movie.cast.map((actor) => (
-                      <div key={actor} className="flex items-center">
-                        <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span>{actor}</span>
-                      </div>
+                  <h2 className="text-lg font-semibold mb-3">Rate this Movie</h2>
+                  <div className="flex items-center space-x-2">
+                    {[1, 2, 3, 4, 5].map((rating) => (
+                      <button
+                        key={rating}
+                        onClick={() => setUserRating(rating)}
+                        className="p-1"
+                      >
+                        <Star 
+                          className={`h-6 w-6 ${
+                            userRating !== null && rating <= userRating
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-400'
+                          }`}
+                        />
+                      </button>
                     ))}
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h2 className="text-xl font-semibold mb-3">Rate this Movie</h2>
-                <div className="flex items-center space-x-2">
-                  {[1, 2, 3, 4, 5].map((rating) => (
-                    <button
-                      key={rating}
-                      onClick={() => setUserRating(rating)}
-                      className="p-1"
+                    <Button 
+                      onClick={handleRateMovie}
+                      disabled={userRating === null}
+                      className="ml-4"
+                      size="sm"
                     >
-                      <Star 
-                        className={`h-8 w-8 ${
-                          userRating !== null && rating <= userRating
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-400'
-                        }`}
-                      />
-                    </button>
-                  ))}
-                  <Button 
-                    onClick={handleRateMovie}
-                    disabled={userRating === null}
-                    className="ml-4"
-                  >
-                    Submit Rating
-                  </Button>
+                      Submit Rating
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+          
+          <Separator className="my-6" />
+          
+          {/* Recommended Movies */}
+          {recommendedMovies.length > 0 && (
+            <div className="mt-6">
+              <h2 className="text-xl font-semibold mb-4">Recommended For You</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                {recommendedMovies.map(movie => (
+                  <div 
+                    key={movie.id}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      navigate(`/movies/${movie.id}`);
+                    }}
+                  >
+                    <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-md">
+                      <img 
+                        src={movie.posterUrl} 
+                        alt={movie.title}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
+                    </div>
+                    <h3 className="mt-2 text-sm font-medium line-clamp-1">{movie.title}</h3>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <div className="mt-6 flex justify-end">
+            <Button variant="outline" onClick={handleClose}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
