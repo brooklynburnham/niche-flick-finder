@@ -1,9 +1,8 @@
-
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
-import { Movie } from '@/contexts/MovieContext';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Star } from "lucide-react";
+import { Movie } from "@/contexts/MovieContext";
+import { cn } from "@/lib/utils";
 
 interface MovieCardProps {
   movie: Movie;
@@ -12,20 +11,21 @@ interface MovieCardProps {
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie, className }) => {
   return (
-    <Link 
-      to={`/movies/${movie.id}`} 
-      className={cn("movie-card block", className)}
-    >
+    <Link
+      to={`/movies/${movie.id}`}
+      className={cn("movie-card block", className)}>
       <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
-        <img 
-          src={movie.posterUrl} 
-          alt={movie.title} 
+        <img
+          src={movie.posterUrl}
+          alt={movie.title}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
         <div className="movie-card-content">
-          <h3 className="font-medium text-base md:text-lg mb-1 text-balance">{movie.title}</h3>
+          <h3 className="font-medium text-base md:text-lg mb-1 text-balance">
+            {movie.title}
+          </h3>
           <div className="flex items-center text-xs md:text-sm text-gray-300">
-            <span>{movie.releaseDate.split('-')[0]}</span>
+            <span>{movie.releaseDate.split("-")[0]}</span>
             <span className="mx-2">•</span>
             <span>{movie.contentRating}</span>
             {movie.userRating > 0 && (
@@ -40,10 +40,9 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, className }) => {
           </div>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {movie.genres.slice(0, 2).map((genre) => (
-              <span 
-                key={genre} 
-                className="inline-flex items-center rounded-full bg-cineniche-blue/20 px-2 py-0.5 text-xs font-medium text-cineniche-light-blue"
-              >
+              <span
+                key={genre}
+                className="inline-flex items-center rounded-full bg-cineniche-blue/20 px-2 py-0.5 text-xs font-medium text-cineniche-light-blue">
                 {genre}
               </span>
             ))}
