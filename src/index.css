@@ -68,4 +68,17 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Carousel custom styling */
+  .carousel-container {
+    @apply relative mx-auto w-full max-w-full overflow-hidden;
+  }
+  
+  .carousel-slide {
+    @apply h-full w-full flex-shrink-0 transform transition-all duration-700;
+  }
+  
+  .carousel-navigation-button {
+    @apply absolute top-1/2 -translate-y-1/2 rounded-full bg-cineniche-blue/70 p-2 text-white shadow-lg transition-all hover:bg-cineniche-blue;
+  }
 }

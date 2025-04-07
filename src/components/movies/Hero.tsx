@@ -14,7 +14,7 @@ const Hero: React.FC<HeroProps> = ({ movie }) => {
   const { isAuthenticated } = useAuth();
   
   return (
-    <div className="relative h-[70vh] overflow-hidden">
+    <div className="relative h-[400px] overflow-hidden rounded-lg">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img 
@@ -26,13 +26,13 @@ const Hero: React.FC<HeroProps> = ({ movie }) => {
       </div>
       
       {/* Content */}
-      <div className="container relative h-full flex flex-col justify-center">
-        <div className="max-w-2xl space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+      <div className="relative h-full flex flex-col justify-end p-6">
+        <div className="space-y-3">
+          <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
             {movie.title}
           </h1>
           
-          <div className="flex items-center text-sm md:text-base text-gray-300">
+          <div className="flex items-center text-sm text-gray-300">
             <span>{movie.releaseDate.split('-')[0]}</span>
             <span className="mx-2">•</span>
             <span>{movie.contentRating}</span>
@@ -50,27 +50,25 @@ const Hero: React.FC<HeroProps> = ({ movie }) => {
           </div>
           
           <div className="flex flex-wrap gap-2">
-            {movie.genres.map((genre) => (
+            {movie.genres.slice(0, 3).map((genre) => (
               <span 
                 key={genre} 
-                className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-xs md:text-sm font-medium text-white"
+                className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white"
               >
                 {genre}
               </span>
             ))}
           </div>
           
-          <p className="text-sm md:text-base text-gray-300 max-w-xl">
-            {movie.description}
-          </p>
-          
-          <div className="flex flex-wrap gap-4 pt-2">
-            <Button className="gap-2 bg-cineniche-blue hover:bg-cineniche-blue/90">
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Button size="sm" className="gap-2 bg-cineniche-blue hover:bg-cineniche-blue/90">
               <Play className="h-4 w-4" />
-              Watch Now
+              Watch
             </Button>
             <Link to={`/movies/${movie.id}`}>
-              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">View Details</Button>
+              <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                Details
+              </Button>
             </Link>
           </div>
         </div>

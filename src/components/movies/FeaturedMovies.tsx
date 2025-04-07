@@ -2,7 +2,13 @@
 import React from 'react';
 import { Movie } from '@/contexts/MovieContext';
 import MovieCard from './MovieCard';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from '@/components/ui/carousel';
 
 interface FeaturedMoviesProps {
   title: string;
@@ -17,16 +23,27 @@ const FeaturedMovies: React.FC<FeaturedMoviesProps> = ({ title, movies }) => {
       <div className="container">
         <h2 className="text-2xl font-bold mb-6 text-cineniche-dark-blue">{title}</h2>
         
-        <ScrollArea>
-          <div className="flex space-x-4 pb-4">
-            {movies.map((movie) => (
-              <div key={movie.id} className="w-[200px] sm:w-[220px] flex-none">
-                <MovieCard movie={movie} />
-              </div>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        <div className="relative">
+          <Carousel 
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {movies.map((movie) => (
+                <CarouselItem key={movie.id} className="md:basis-1/4 lg:basis-1/5">
+                  <div className="p-1">
+                    <MovieCard movie={movie} />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2" />
+            <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2" />
+          </Carousel>
+        </div>
       </div>
     </section>
   );

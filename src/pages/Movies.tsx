@@ -5,8 +5,14 @@ import Layout from '@/components/layout/Layout';
 import MovieGrid from '@/components/movies/MovieGrid';
 import GenreFilter from '@/components/movies/GenreFilter';
 import Hero from '@/components/movies/Hero';
+import FeaturedMovies from '@/components/movies/FeaturedMovies';
 import { useMovies } from '@/contexts/MovieContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem 
+} from '@/components/ui/carousel';
 
 const Movies = () => {
   const { isAuthenticated } = useAuth();
@@ -40,15 +46,50 @@ const Movies = () => {
     setFilters({ ...filters, genre });
   };
 
+  // Generate movie categories
+  const getPopularMovies = () => {
+    return movies
+      .filter(movie => movie.userRating >= 4)
+      .sort((a, b) => b.userRating - a.userRating)
+      .slice(0, 10);
+  };
+
+  const getRecentMovies = () => {
+    return [...movies]
+      .sort((a, b) => new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime())
+      .slice(0, 10);
+  };
+
   if (!isAuthenticated) {
     return null; // Don't render anything while redirecting
   }
 
   return (
     <Layout onSearch={handleSearch}>
-      {/* Hero Banner with Featured Movie */}
+      {/* Top Featured Movies Carousel */}
       {featuredMovies.length > 0 && !filters.searchQuery && !filters.genre && (
-        <Hero movie={featuredMovies[0]} />
+        <div className="bg-cineniche-dark-blue py-6">
+          <div className="container">
+            <h2 className="text-2xl font-bold mb-6 text-white">Featured Movies</h2>
+            <Carousel 
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {featuredMovies.map((movie) => (
+                  <CarouselItem key={movie.id} className="md:basis-1/2 lg:basis-1/3">
+                    <div className="p-1">
+                      <Hero movie={movie} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          </div>
+        </div>
       )}
 
       <div className="container py-8">
@@ -68,6 +109,7 @@ const Movies = () => {
             <p className="text-muted-foreground">
               Found {filteredMovies.length} {filteredMovies.length === 1 ? 'movie' : 'movies'}
             </p>
+            <MovieGrid movies={filteredMovies} loading={loading} />
           </div>
         )}
         
@@ -80,16 +122,24 @@ const Movies = () => {
             <p className="text-muted-foreground">
               Found {filteredMovies.length} {filteredMovies.length === 1 ? 'movie' : 'movies'}
             </p>
+            <MovieGrid movies={filteredMovies} loading={loading} />
           </div>
         )}
         
-        {/* All Movies (default) */}
+        {/* Category Sections - Only show when no filters active */}
         {!filters.genre && !filters.searchQuery && (
-          <h2 className="text-2xl font-bold mb-6">All Movies</h2>
+          <>
+            {/* Popular Movies Section */}
+            <FeaturedMovies title="Popular Movies" movies={getPopularMovies()} />
+            
+            {/* Recent Releases Section */}
+            <FeaturedMovies title="Recent Releases" movies={getRecentMovies()} />
+            
+            {/* All Movies Section */}
+            <h2 className="text-2xl font-bold mb-6">All Movies</h2>
+            <MovieGrid movies={filteredMovies} loading={loading} />
+          </>
         )}
-        
-        {/* Movie Grid */}
-        <MovieGrid movies={filteredMovies} loading={loading} />
       </div>
     </Layout>
   );
