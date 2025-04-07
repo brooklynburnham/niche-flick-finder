@@ -19,6 +19,20 @@ const Movies = () => {
   const { isAuthenticated } = useAuth();
   const { movies, filteredMovies, loading, filters, setFilters, featuredMovies } = useMovies();
   const navigate = useNavigate();
+  const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
+  
+  // Auto-rotate featured movies every 10 seconds
+  useEffect(() => {
+    if (featuredMovies.length <= 1) return;
+    
+    const intervalId = setInterval(() => {
+      setCurrentFeaturedIndex(prevIndex => 
+        prevIndex === featuredMovies.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 10000);
+    
+    return () => clearInterval(intervalId);
+  }, [featuredMovies.length]);
   
   // Redirect if not authenticated
   useEffect(() => {
@@ -93,28 +107,19 @@ const Movies = () => {
 
   return (
     <Layout onSearch={handleSearch}>
-      {/* Top Featured Movies Carousel */}
+      {/* Auto-Rotating Featured Movie */}
       {featuredMovies.length > 0 && !filters.searchQuery && !filters.genre && (
         <div className="bg-cineniche-dark-blue py-6">
           <div className="container">
             <h2 className="text-2xl font-bold mb-6 text-white">Featured Movies</h2>
-            <Carousel 
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              className="w-full"
-            >
-              <CarouselContent>
-                {featuredMovies.map((movie) => (
-                  <CarouselItem key={movie.id} className="md:basis-1/2 lg:basis-1/3">
-                    <div className="p-1">
-                      <Hero movie={movie} />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
+            {featuredMovies.map((movie, index) => (
+              <div 
+                key={movie.id} 
+                className={`transition-opacity duration-1000 ${currentFeaturedIndex === index ? 'opacity-100' : 'hidden'}`}
+              >
+                <Hero movie={movie} />
+              </div>
+            ))}
           </div>
         </div>
       )}

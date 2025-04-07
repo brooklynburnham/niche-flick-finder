@@ -14,12 +14,9 @@ const Index = () => {
   const { featuredMovies, movies, loading } = useMovies();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // If user is already authenticated, redirect to movies
-    if (isAuthenticated) {
-      navigate('/movies');
-    }
-  }, [isAuthenticated, navigate]);
+  // Now we don't automatically redirect users to the movies page
+  // We want them to be able to see the movies but prompt login
+  // when they try to access a specific movie
 
   if (loading) {
     return (
@@ -31,11 +28,11 @@ const Index = () => {
     );
   }
 
-  // Render the landing page for non-authenticated users
+  // For unauthenticated users, we'll show a modified version of the Movies page
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="relative h-[85vh] flex items-center">
+      {/* Hero Section with Call to Action */}
+      <section className="relative h-[70vh] flex items-center">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1920" 
@@ -54,25 +51,77 @@ const Index = () => {
               CineNiche brings you cult classics, international masterpieces, indie gems, and niche documentaries you won't find anywhere else.
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
-              <Button
-                className="gap-2"
-                size="lg"
-                onClick={() => navigate('/register')}
-              >
-                <Play className="h-4 w-4" />
-                Start Watching
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => navigate('/login')}
-              >
-                Already a Member? Log In
-              </Button>
+              {!isAuthenticated && (
+                <>
+                  <Button
+                    className="gap-2"
+                    size="lg"
+                    onClick={() => navigate('/register')}
+                  >
+                    <Play className="h-4 w-4" />
+                    Start Watching
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => navigate('/login')}
+                  >
+                    Already a Member? Log In
+                  </Button>
+                </>
+              )}
+              {isAuthenticated && (
+                <Button
+                  className="gap-2"
+                  size="lg"
+                  onClick={() => navigate('/movies')}
+                >
+                  <Play className="h-4 w-4" />
+                  Browse All Movies
+                </Button>
+              )}
             </div>
           </div>
         </div>
       </section>
+
+      {/* Feature Movie Carousel Section */}
+      {featuredMovies.length > 0 && (
+        <div className="bg-cineniche-dark-blue py-6">
+          <div className="container">
+            <h2 className="text-2xl font-bold mb-6 text-white">Featured Movies</h2>
+            <div className="space-y-4">
+              {featuredMovies.slice(0, 5).map((movie) => (
+                <div key={movie.id} className="p-1">
+                  <Hero 
+                    movie={movie} 
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Popular Movies Section */}
+      {movies.length > 0 && (
+        <>
+          <FeaturedMovies 
+            title="Popular Movies" 
+            movies={movies.filter(m => m.userRating >= 4).slice(0, 10)} 
+          />
+          
+          <FeaturedMovies 
+            title="Recent Releases" 
+            movies={movies.sort((a, b) => new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime()).slice(0, 10)} 
+          />
+          
+          <FeaturedMovies 
+            title="Action Movies" 
+            movies={movies.filter(m => m.genres.includes('Action')).slice(0, 10)} 
+          />
+        </>
+      )}
 
       {/* Features Section */}
       <section className="py-20 bg-gradient-to-b from-background to-secondary/20">
@@ -115,70 +164,35 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Preview Section */}
-      <section className="py-16">
-        <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-4">
-            Explore Our Collection
-          </h2>
-          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
-            Here's a sneak peek at some of the exceptional films in our growing library.
-          </p>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {movies.slice(0, 10).map((movie) => (
-              <div key={movie.id} className="relative aspect-[2/3] movie-card">
-                <img 
-                  src={movie.posterUrl} 
-                  alt={movie.title} 
-                  className="w-full h-full object-cover rounded-lg"
-                />
-                <div className="movie-card-content rounded-lg">
-                  <h3 className="font-medium text-sm">{movie.title}</h3>
-                  <p className="text-xs text-gray-300">{movie.releaseDate.split('-')[0]}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="mt-12 text-center">
-            <Button 
-              size="lg"
-              onClick={() => navigate('/register')}
-            >
-              Join Now to Watch
-            </Button>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
-      <section className="py-20 bg-cineniche-dark-purple">
-        <div className="container text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Start Your Journey?
-          </h2>
-          <p className="text-gray-300 max-w-2xl mx-auto mb-8">
-            Join CineNiche today and start exploring our unique collection of films that you won't find on mainstream platforms.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button 
-              size="lg" 
-              className="bg-cineniche-purple hover:bg-cineniche-purple/90"
-              onClick={() => navigate('/register')}
-            >
-              Create an Account
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => navigate('/login')}
-            >
-              Log In
-            </Button>
+      {!isAuthenticated && (
+        <section className="py-20 bg-cineniche-dark-purple">
+          <div className="container text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              Ready to Start Your Journey?
+            </h2>
+            <p className="text-gray-300 max-w-2xl mx-auto mb-8">
+              Join CineNiche today and start exploring our unique collection of films that you won't find on mainstream platforms.
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="bg-cineniche-purple hover:bg-cineniche-purple/90"
+                onClick={() => navigate('/register')}
+              >
+                Create an Account
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => navigate('/login')}
+              >
+                Log In
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </Layout>
   );
 };

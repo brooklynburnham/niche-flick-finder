@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -35,6 +36,7 @@ interface MovieContextType {
   addMovie: (movie: Omit<Movie, 'id'>) => void;
   updateMovie: (id: string, movie: Partial<Movie>) => void;
   deleteMovie: (id: string) => void;
+  getRecommendedMoviesById: (id: string) => Movie[];
 }
 
 // Mock data (in a real app, this would be fetched from the API)
@@ -94,6 +96,26 @@ export const MovieProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return movies.find(movie => movie.id === id);
   };
 
+  // Get recommended movies based on movie ID
+  const getRecommendedMoviesById = (id: string) => {
+    const movie = getMovieById(id);
+    if (!movie) return [];
+    
+    // Find movies with similar genres
+    return movies
+      .filter(m => 
+        m.id !== movie.id && // Exclude current movie
+        m.genres.some(genre => movie.genres.includes(genre)) // Must share at least one genre
+      )
+      .sort((a, b) => {
+        // Count matching genres for better sorting
+        const aMatches = a.genres.filter(genre => movie.genres.includes(genre)).length;
+        const bMatches = b.genres.filter(genre => movie.genres.includes(genre)).length;
+        return bMatches - aMatches; // Sort by most matching genres first
+      })
+      .slice(0, 6); // Limit to 6 recommendations
+  };
+
   // Rate a movie
   const rateMovie = (id: string, rating: number) => {
     setMovies(prevMovies => 
@@ -145,6 +167,7 @@ export const MovieProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addMovie,
         updateMovie,
         deleteMovie,
+        getRecommendedMoviesById,
       }}
     >
       {children}
