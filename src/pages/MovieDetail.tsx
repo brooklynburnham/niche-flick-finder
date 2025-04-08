@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, Film, User } from "lucide-react";
@@ -15,6 +16,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import RecommendedMovies from "@/components/movies/RecommendedMovies";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,8 +34,6 @@ const MovieDetail = () => {
     setDialogOpen(false);
     navigate("/movies");
   };
-
-  // No longer redirect unauthenticated users, instead show a login prompt
 
   // Handle rating submission
   const handleRateMovie = () => {
@@ -233,26 +233,46 @@ const MovieDetail = () => {
                   <h2 className="text-xl font-semibold mb-4">
                     Recommended For You
                   </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                    {recommendedMovies.map((movie) => (
-                      <div
-                        key={movie.id}
-                        className="cursor-pointer"
-                        onClick={() => {
-                          navigate(`/movies/${movie.id}`);
-                        }}>
-                        <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-md">
-                          <img
-                            src={movie.posterUrl}
-                            alt={movie.title}
-                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                          />
-                        </div>
-                        <h3 className="mt-2 text-sm font-medium line-clamp-1">
-                          {movie.title}
-                        </h3>
-                      </div>
-                    ))}
+                  
+                  <div className="relative px-2">
+                    <Carousel 
+                      opts={{
+                        align: "start",
+                        loop: false,
+                        slidesToScroll: 1
+                      }}
+                      className="w-full"
+                    >
+                      <CarouselContent>
+                        {recommendedMovies.map((recMovie) => (
+                          <CarouselItem key={recMovie.id} className="md:basis-1/5">
+                            <div 
+                              className="p-1 cursor-pointer" 
+                              onClick={() => {
+                                setDialogOpen(false);
+                                navigate(`/movies/${recMovie.id}`);
+                              }}
+                            >
+                              <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-md">
+                                <img 
+                                  src={recMovie.posterUrl} 
+                                  alt={recMovie.title}
+                                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                />
+                              </div>
+                              <h3 className="mt-2 text-sm font-medium line-clamp-1">
+                                {recMovie.title}
+                              </h3>
+                              <div className="text-xs text-muted-foreground">
+                                {recMovie.releaseDate.split('-')[0]}
+                              </div>
+                            </div>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
                   </div>
                 </div>
               )}

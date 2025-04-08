@@ -19,6 +19,11 @@ export interface Movie {
   featured?: boolean;
 }
 
+export interface MovieRecommendation {
+  movieId: string;
+  recommendations: string[]; // Contains the IDs of recommended movies
+}
+
 export interface MovieFilter {
   genre?: string;
   searchQuery?: string;
@@ -44,6 +49,21 @@ interface MovieContextType {
 // Mock data (in a real app, this would be fetched from the API)
 import mockMovies from '../data/mockMovies';
 
+// Mock recommendation data structure that would come from SQLite
+const mockRecommendations: Record<string, string[]> = {};
+
+// Generate mock recommendations for each movie
+mockMovies.forEach(movie => {
+  // Get 10 random different movies as recommendations
+  const recommendations = mockMovies
+    .filter(m => m.id !== movie.id)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 10)
+    .map(m => m.id);
+  
+  mockRecommendations[movie.id] = recommendations;
+});
+
 const MovieContext = createContext<MovieContextType | undefined>(undefined);
 
 export const MovieProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -51,6 +71,7 @@ export const MovieProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<MovieFilter>({});
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+  const [recommendations, setRecommendations] = useState<Record<string, string[]>>(mockRecommendations);
 
   // Load mock data initially
   useEffect(() => {
@@ -107,22 +128,12 @@ export const MovieProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Get recommended movies based on movie ID
   const getRecommendedMoviesById = (id: string) => {
-    const movie = getMovieById(id);
-    if (!movie) return [];
+    const recommendationIds = recommendations[id] || [];
+    const recommendedMovies = recommendationIds
+      .map(recId => movies.find(movie => movie.id === recId))
+      .filter((movie): movie is Movie => movie !== undefined);
     
-    // Find movies with similar genres
-    return movies
-      .filter(m => 
-        m.id !== movie.id && // Exclude current movie
-        m.genres.some(genre => movie.genres.includes(genre)) // Must share at least one genre
-      )
-      .sort((a, b) => {
-        // Count matching genres for better sorting
-        const aMatches = a.genres.filter(genre => movie.genres.includes(genre)).length;
-        const bMatches = b.genres.filter(genre => movie.genres.includes(genre)).length;
-        return bMatches - aMatches; // Sort by most matching genres first
-      })
-      .slice(0, 6); // Limit to 6 recommendations
+    return recommendedMovies;
   };
 
   // Rate a movie

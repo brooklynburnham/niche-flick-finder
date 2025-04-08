@@ -14,12 +14,14 @@ interface RecommendedMoviesProps {
   title: string;
   movies: Movie[];
   sourceMovieId?: string;
+  visibleCount?: number;
 }
 
 const RecommendedMovies: React.FC<RecommendedMoviesProps> = ({ 
   title, 
   movies,
-  sourceMovieId
+  sourceMovieId,
+  visibleCount = 5 // Default to showing 5 movies
 }) => {
   const navigate = useNavigate();
   
@@ -34,13 +36,13 @@ const RecommendedMovies: React.FC<RecommendedMoviesProps> = ({
           <Carousel 
             opts={{
               align: "start",
-              loop: true,
+              loop: false,
             }}
             className="w-full"
           >
             <CarouselContent>
               {movies.map((movie) => (
-                <CarouselItem key={movie.id} className="md:basis-1/4 lg:basis-1/5">
+                <CarouselItem key={movie.id} className="md:basis-1/5">
                   <div 
                     className="p-1 cursor-pointer" 
                     onClick={() => navigate(`/movies/${movie.id}`)}
