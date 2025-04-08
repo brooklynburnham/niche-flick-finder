@@ -19,15 +19,26 @@ export interface Movie {
   featured?: boolean;
 }
 
-export interface MovieRecommendation {
-  movieId: string;
-  recommendations: string[]; // Contains the IDs of recommended movies
-}
-
 export interface MovieFilter {
   genre?: string;
   searchQuery?: string;
 }
+
+// API function to get movie recommendations (this is a placeholder, the actual implementation is in MovieDetail.tsx)
+export const getMovieRecommendations = async (id: string): Promise<Movie[]> => {
+  const API_BASE_URL = "/api/movies"; // Replace with your actual API base URL
+  try {
+    const response = await fetch(`${API_BASE_URL}/${id}/recommendations`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch movie recommendations');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching movie recommendations:', error);
+    // Return an empty array as fallback
+    return [];
+  }
+};
 
 interface MovieContextType {
   movies: Movie[];
@@ -127,6 +138,7 @@ export const MovieProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Get recommended movies based on movie ID
+  // This function now exists as a placeholder - the actual implementation uses the API function
   const getRecommendedMoviesById = (id: string) => {
     const recommendationIds = recommendations[id] || [];
     const recommendedMovies = recommendationIds

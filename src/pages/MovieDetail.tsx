@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, Film, User } from "lucide-react";
@@ -17,17 +16,59 @@ import {
 } from "@/components/ui/dialog";
 import RecommendedMovies from "@/components/movies/RecommendedMovies";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from '@/components/ui/carousel';
+
+// API function to get movie recommendations
+const API_BASE_URL = "/api/movies"; // Replace with your actual API base URL
+export const getMovieRecommendations = async (id: string): Promise<Movie[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/${id}/recommendations`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch movie recommendations');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching movie recommendations:', error);
+    throw error;
+  }
+};
 
 const MovieDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { getMovieById, rateMovie, loading, getRecommendedMoviesById } =
-    useMovies();
+  const { getMovieById, rateMovie, loading } = useMovies();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [userRating, setUserRating] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(true);
+  const [recommendedMovies, setRecommendedMovies] = useState<Movie[]>([]);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
 
   const movie = id ? getMovieById(id) : undefined;
+
+  // Fetch movie recommendations from API
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (id) {
+        setIsLoadingRecommendations(true);
+        try {
+          const recommendations = await getMovieRecommendations(id);
+          setRecommendedMovies(recommendations);
+        } catch (error) {
+          console.error("Failed to load recommendations:", error);
+        } finally {
+          setIsLoadingRecommendations(false);
+        }
+      }
+    };
+
+    fetchRecommendations();
+  }, [id]);
 
   // Handle dialog close
   const handleClose = () => {
@@ -41,9 +82,6 @@ const MovieDetail = () => {
       rateMovie(id, userRating);
     }
   };
-
-  // Get recommended movies based on genre
-  const recommendedMovies = id ? getRecommendedMoviesById(id) : [];
 
   if (loading) {
     return (
@@ -228,52 +266,24 @@ const MovieDetail = () => {
               <Separator className="my-6" />
 
               {/* Recommended Movies */}
-              {recommendedMovies.length > 0 && (
+              {(recommendedMovies.length > 0 || isLoadingRecommendations) && (
                 <div className="mt-6">
                   <h2 className="text-xl font-semibold mb-4">
                     Recommended For You
                   </h2>
                   
-                  <div className="relative px-2">
-                    <Carousel 
-                      opts={{
-                        align: "start",
-                        loop: false,
-                        slidesToScroll: 1
-                      }}
-                      className="w-full"
-                    >
-                      <CarouselContent>
-                        {recommendedMovies.map((recMovie) => (
-                          <CarouselItem key={recMovie.id} className="md:basis-1/5">
-                            <div 
-                              className="p-1 cursor-pointer" 
-                              onClick={() => {
-                                setDialogOpen(false);
-                                navigate(`/movies/${recMovie.id}`);
-                              }}
-                            >
-                              <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-md">
-                                <img 
-                                  src={recMovie.posterUrl} 
-                                  alt={recMovie.title}
-                                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                                />
-                              </div>
-                              <h3 className="mt-2 text-sm font-medium line-clamp-1">
-                                {recMovie.title}
-                              </h3>
-                              <div className="text-xs text-muted-foreground">
-                                {recMovie.releaseDate.split('-')[0]}
-                              </div>
-                            </div>
-                          </CarouselItem>
-                        ))}
-                      </CarouselContent>
-                      <CarouselPrevious />
-                      <CarouselNext />
-                    </Carousel>
-                  </div>
+                  {isLoadingRecommendations ? (
+                    <div className="flex justify-center py-10">
+                      <div className="h-8 w-8 rounded-full border-2 border-cineniche-purple border-t-transparent animate-spin"></div>
+                    </div>
+                  ) : (
+                    <RecommendedMovies 
+                      title="" 
+                      movies={recommendedMovies} 
+                      sourceMovieId={id} 
+                      visibleCount={5} 
+                    />
+                  )}
                 </div>
               )}
 
