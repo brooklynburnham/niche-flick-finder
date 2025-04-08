@@ -1,16 +1,13 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Movie } from '@/contexts/MovieContext';
-import MovieCard from './MovieCard';
 import { 
   Carousel, 
-  CarouselContent, 
-  CarouselItem, 
   CarouselNext, 
   CarouselPrevious 
 } from '@/components/ui/carousel';
-import { Button } from '@/components/ui/button';
-import { Circle } from 'lucide-react';
+import CarouselDots from './CarouselDots';
+import MovieCarouselItems from './MovieCarouselItems';
 
 interface FeaturedMoviesProps {
   title: string;
@@ -71,39 +68,18 @@ const FeaturedMovies: React.FC<FeaturedMoviesProps> = ({ title, movies }) => {
             setApi={setApi}
             className="w-full"
           >
-            <CarouselContent>
-              {featuredMoviesToShow.map((movie) => (
-                <CarouselItem key={movie.id} className="basis-full">
-                  <div className="p-1">
-                    <MovieCard movie={movie} />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
+            <MovieCarouselItems movies={featuredMoviesToShow} />
             
             <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2" />
             <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2" />
           </Carousel>
           
           {/* Navigation dots */}
-          <div className="flex justify-center mt-4 gap-2">
-            {featuredMoviesToShow.map((_, index) => (
-              <Button 
-                key={index}
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 p-0"
-                onClick={() => api?.scrollTo(index)}
-              >
-                {index === currentIndex ? (
-                  <Circle className="h-3 w-3 fill-cineniche-purple text-cineniche-purple" />
-                ) : (
-                  <Circle className="h-3 w-3" />
-                )}
-                <span className="sr-only">Go to slide {index + 1}</span>
-              </Button>
-            ))}
-          </div>
+          <CarouselDots 
+            count={featuredMoviesToShow.length}
+            currentIndex={currentIndex}
+            onDotClick={(index) => api?.scrollTo(index)}
+          />
         </div>
       </div>
     </section>
