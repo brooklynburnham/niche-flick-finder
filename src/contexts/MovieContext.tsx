@@ -37,6 +37,8 @@ interface MovieContextType {
   updateMovie: (id: string, movie: Partial<Movie>) => void;
   deleteMovie: (id: string) => void;
   getRecommendedMoviesById: (id: string) => Movie[];
+  getMoviesByPage: (page: number, pageSize: number) => Movie[];
+  totalMoviesCount: number;
 }
 
 // Mock data (in a real app, this would be fetched from the API)
@@ -94,6 +96,13 @@ export const MovieProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Get a movie by ID
   const getMovieById = (id: string) => {
     return movies.find(movie => movie.id === id);
+  };
+
+  // Get movies by page
+  const getMoviesByPage = (page: number, pageSize: number) => {
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredMovies.slice(startIndex, endIndex);
   };
 
   // Get recommended movies based on movie ID
@@ -168,6 +177,8 @@ export const MovieProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateMovie,
         deleteMovie,
         getRecommendedMoviesById,
+        getMoviesByPage,
+        totalMoviesCount: filteredMovies.length,
       }}
     >
       {children}
