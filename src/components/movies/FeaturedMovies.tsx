@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
 import { Circle } from 'lucide-react';
-import useEmblaCarousel from 'embla-carousel-react';
 
 interface FeaturedMoviesProps {
   title: string;
@@ -20,48 +19,36 @@ interface FeaturedMoviesProps {
 
 const FeaturedMovies: React.FC<FeaturedMoviesProps> = ({ title, movies }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    loop: true,
-    align: "start",
-    skipSnaps: false,
-    duration: 30
-  });
+  const [api, setApi] = useState<any>(null);
 
-  const scrollTo = useCallback((index: number) => {
-    if (emblaApi) {
-      emblaApi.scrollTo(index);
-    }
-  }, [emblaApi]);
-
-  const onSelect = useCallback(() => {
-    if (emblaApi) {
-      setCurrentIndex(emblaApi.selectedScrollSnap());
-    }
-  }, [emblaApi]);
-
+  // Effect for auto-rotation
   useEffect(() => {
-    if (emblaApi) {
-      emblaApi.on('select', onSelect);
-      return () => {
-        emblaApi.off('select', onSelect);
-      };
-    }
-  }, [emblaApi, onSelect]);
-
-  // Auto-rotation effect
-  useEffect(() => {
-    if (!emblaApi) return;
+    if (!api) return;
 
     const interval = setInterval(() => {
-      if (emblaApi.canScrollNext()) {
-        emblaApi.scrollNext();
+      if (api.canScrollNext()) {
+        api.scrollNext();
       } else {
-        emblaApi.scrollTo(0);
+        api.scrollTo(0);
       }
     }, 5000); // 5 seconds interval
 
     return () => clearInterval(interval);
-  }, [emblaApi]);
+  }, [api]);
+
+  // Update current index when carousel changes
+  useEffect(() => {
+    if (!api) return;
+
+    const onSelect = () => {
+      setCurrentIndex(api.selectedScrollSnap());
+    };
+
+    api.on('select', onSelect);
+    return () => {
+      api.off('select', onSelect);
+    };
+  }, [api]);
 
   if (!movies.length) return null;
   
@@ -74,20 +61,29 @@ const FeaturedMovies: React.FC<FeaturedMoviesProps> = ({ title, movies }) => {
         <h2 className="text-2xl font-bold mb-6 text-cineniche-dark-blue">{title}</h2>
         
         <div className="relative">
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex">
+          <Carousel
+            opts={{
+              loop: true,
+              align: "start",
+              skipSnaps: false,
+              duration: 30
+            }}
+            setApi={setApi}
+            className="w-full"
+          >
+            <CarouselContent>
               {featuredMoviesToShow.map((movie) => (
-                <div 
-                  key={movie.id} 
-                  className="min-w-0 flex-[0_0_100%] pl-0 transition-transform duration-500"
-                >
+                <CarouselItem key={movie.id} className="basis-full">
                   <div className="p-1">
                     <MovieCard movie={movie} />
                   </div>
-                </div>
+                </CarouselItem>
               ))}
-            </div>
-          </div>
+            </CarouselContent>
+            
+            <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2" />
+            <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2" />
+          </Carousel>
           
           {/* Navigation dots */}
           <div className="flex justify-center mt-4 gap-2">
@@ -97,7 +93,7 @@ const FeaturedMovies: React.FC<FeaturedMoviesProps> = ({ title, movies }) => {
                 variant="ghost" 
                 size="icon" 
                 className="h-8 w-8 p-0"
-                onClick={() => scrollTo(index)}
+                onClick={() => api?.scrollTo(index)}
               >
                 {index === currentIndex ? (
                   <Circle className="h-3 w-3 fill-cineniche-purple text-cineniche-purple" />
@@ -108,15 +104,6 @@ const FeaturedMovies: React.FC<FeaturedMoviesProps> = ({ title, movies }) => {
               </Button>
             ))}
           </div>
-          
-          <CarouselPrevious 
-            onClick={() => emblaApi?.scrollPrev()} 
-            className="absolute left-0 top-1/2 -translate-y-1/2" 
-          />
-          <CarouselNext 
-            onClick={() => emblaApi?.scrollNext()} 
-            className="absolute right-0 top-1/2 -translate-y-1/2" 
-          />
         </div>
       </div>
     </section>
